@@ -1,0 +1,7 @@
+my_social_stats.content:
+  path: '/hello'
+  defaults:
+    _controller: '\Drupal\my_social_stats\Controller\MySocialStatsController::content'
+    _title: 'Hello World'
+  requirements:
+    _permission: 'access content'
