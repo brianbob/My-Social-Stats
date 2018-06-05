@@ -13,13 +13,21 @@ use Drupal\Core\Form\FormStateInterface;
  *   id = "hello_block",
  *   admin_label = @Translation("Hello Block"),
  *   category = @Translation("Hello World"),
- * ) 
+ * )
  */
 class HelloBlock extends BlockBase implements BlockPluginInterface {
-  
+
   public function build() {
     return array(
       '#markup' => $this->t('Hello World!'),
+      // Don't think I need these lines?
+      //'#theme' => 'your_module_theme_id',
+      //'#someVariable' => $some_variable,
+      '#attached' => array(
+        'library' => array(
+          'my_social_stats/mss-test',
+        ),
+      ),
     );
   }
 
