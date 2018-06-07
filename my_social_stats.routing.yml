@@ -1,7 +1,7 @@
 my_social_stats.content:
-  path: '/hello'
+  path: '/social-stats'
   defaults:
     _controller: '\Drupal\my_social_stats\Controller\MySocialStatsController::content'
-    _title: 'Hello World'
+    _title: 'Social Media Statistics'
   requirements:
     _permission: 'access content'

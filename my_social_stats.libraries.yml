@@ -9,6 +9,7 @@ mss-test:
     js/mss-test.js: {}
   dependencies:
     - core/jquery
+    - facebook/php-graph-sdk
 
 # Including for example later. We'll need to do something like this to get our charts and what not
 # included

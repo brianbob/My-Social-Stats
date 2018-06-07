@@ -1,0 +1,35 @@
+{
+  "name": "brianbob/my-social-stats",
+  "description": "Simple social stats module",
+  "version": "0.1.0",
+  "type": "library",
+  "keywords": ["social", "stats", "facebook"],
+  "homepage": "http://brianjbridge.com",
+  "time": "2018-06-07",
+  "license": "MIT",
+  "authors": [
+      {
+          "name": "Brian Bridge",
+          "email": "brianjbridge@gmail.com",
+          "homepage": "https://github.com/brianbob",
+          "role": "Developer"
+      }
+  ],
+  "repositories": [
+    {
+      "type": "package",
+      "package": {
+        "name": "facebook/php-graph-sdk",
+        "version": "5.6.2",
+        "dist": {
+          "url": "https://github.com/facebook/php-graph-sdk/archive/5.6.2.zip",
+          "type": "zip"
+        },
+        "type": "drupal-library"
+      }
+    }
+  ],
+  "require": {
+    "facebook/php-graph-sdk": "5.6.2"
+  }
+}
