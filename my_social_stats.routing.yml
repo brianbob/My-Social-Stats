@@ -9,7 +9,7 @@ my_social_stats.content:
 my_social_stats.settings:
   path: '/admin/config/my_social_stats/settings'
   defaults:
-    _controller: '\Drupal\my_social_stats\Form\SocialSettings'
+    _form: '\Drupal\my_social_stats\Form\SocialSettings'
     _title: 'Social Media Settings'
   requirements:
-    _permission: 'access content'
+    _permission: 'administer site configuration'
