@@ -1,8 +1,16 @@
-my_social_stats.content:
+my_social_stats.stats:
   path: '/social-stats'
   defaults:
-    _controller: '\Drupal\my_social_stats\Controller\MySocialStatsController::content'
+    _controller: '\Drupal\my_social_stats\Controller\MySocialStatsController::stats_page'
     _title: 'Social Media Statistics'
+  requirements:
+    _permission: 'access content'
+
+my_social_stats.facebook_callback:
+  path: '/fb-callback'
+  defaults:
+    _controller: '\Drupal\my_social_stats\Controller\MySocialStatsController::fb_callback'
+    _title: 'Facebook Callback'
   requirements:
     _permission: 'access content'
 
