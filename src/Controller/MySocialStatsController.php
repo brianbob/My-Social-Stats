@@ -3,8 +3,31 @@
 namespace Drupal\my_social_stats\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class MySocialStatsController extends ControllerBase {
+  private $fb;
+  private $app_id;
+  private $app_secret;
+
+  /**
+   * [get_fb_object description]
+   * @return [type] [description]
+   */
+  private function get_fb_object() {
+    // Get the config object.
+    $config = \Drupal::config('my_social_stats.settings');
+    // Get our config values.
+    $this->app_id = $config->get('my_social_stats.app_id');
+    $this->app_secret = $config->get('my_social_stats.app_secret');
+    // create and return the facebook object.
+    $this->fb = new \Facebook\Facebook([
+      'app_id' => $this->app_id,
+      'app_secret' => $this->app_secret,
+      'default_graph_version' => 'v2.10',
+      //'default_access_token' => '{access-token}', // optional
+    ]);
+  }
 
   /**
    * Display the markup.
@@ -12,57 +35,49 @@ class MySocialStatsController extends ControllerBase {
    * @return array
    */
   public function stats_page() {
-    // Get the config object.
-    $config = \Drupal::config('my_social_stats.settings');
-    // Get our config values.
-    $id = $config->get('my_social_stats.app_id');
-    $secret = $config->get('my_social_stats.app_secret');
-
-    $fb = new \Facebook\Facebook([
-      'app_id' => $id,
-      'app_secret' => $secret,
-      'default_graph_version' => 'v2.10',
-      //'default_access_token' => '{access-token}', // optional
-    ]);
-
-    $helper = $fb->getRedirectLoginHelper();
-    //_SESSION['FBRLH_state']=$_GET['state'];
-
-    $permissions = ['email']; // Optional permissions
-    $loginUrl = $helper->getLoginUrl('https://brianjbridge.com/fb-callback', $permissions);
+    $message = '';
+    // If there is no token, provide the user an option to login.
+    if (!isset($_SESSION['fb_access_token'])) {
+      $this->get_fb_object();
+      $helper = $this->fb->getRedirectLoginHelper();
+      // Optional permissions
+      $permissions = ['user_location', 'public_profile'];
+      $callback_url = 'https://brianjbridge.com/fb-callback';
+      $loginUrl = $helper->getLoginUrl($callback_url, $permissions);
+      // Return our display.
+      $message = "<p>You are not currently logged in.<br>";
+      $message .= "<a href='$loginUrl'>Log in with Facebook.</a></p>";
+    }
+    else {
+      // @todo redirect or do something else here.
+      $message = 'access token current.';
+    }
 
     return [
       '#type' => 'markup',
-      '#markup' => $this->t("<a href='$loginUrl'>Log in with Facebook!</a>"),
+      '#markup' => $this->t($message),
     ];
   }
 
   public function fb_callback() {
-    // Get the config object.
-    $config = \Drupal::config('my_social_stats.settings');
-    // Get our config values.
-    $id = $config->get('my_social_stats.app_id');
-    $secret = $config->get('my_social_stats.app_secret');
-
-    $fb = new \Facebook\Facebook([
-      'app_id' => $id,
-      'app_secret' => $secret,
-      'default_graph_version' => 'v2.10',
-      //'default_access_token' => '{access-token}', // optional
-    ]);
-    // Login helper.
-    $helper = $fb->getRedirectLoginHelper();
-    //_SESSION['FBRLH_state']=$_GET['state'];
     $message = '';
+    $this->get_fb_object();
+    $helper = $this->fb->getRedirectLoginHelper();
 
     try {
       $accessToken = $helper->getAccessToken();
     } catch(Facebook\Exceptions\FacebookResponseException $e) {
       // When Graph returns an error
-      $message .= 'Graph returned an error: ' . $e->getMessage();
+      return [
+        '#type' => 'markup',
+        '#markup' => 'Graph returned an error: ' . $e->getMessage(),
+      ];
     } catch(Facebook\Exceptions\FacebookSDKException $e) {
       // When validation fails or other local issues
-      $message .=  'Facebook SDK returned an error: ' . $e->getMessage();
+      return [
+        '#type' => 'markup',
+        '#markup' => 'Facebook SDK returned an error: ' . $e->getMessage(),
+      ];
     }
 
     if (! isset($accessToken)) {
@@ -76,17 +91,40 @@ class MySocialStatsController extends ControllerBase {
         //header('HTTP/1.0 400 Bad Request');
         $message .=  'Bad request';
       }
+      return [
+        '#type' => 'markup',
+        '#markup' => $message,
+      ];
     }
     else {
-      $message .= $accessToken->getValue();
+      // The OAuth 2.0 client handler helps us manage access tokens
+      $oAuth2Client = $this->fb->getOAuth2Client();
+      // Get the access token metadata from /debug_token
+      $tokenMetadata = $oAuth2Client->debugToken($accessToken);
+      // Validation (these will throw FacebookSDKException's when they fail)
+      $tokenMetadata->validateAppId($this->app_id);
+      // If you know the user ID this access token belongs to, you can validate it here
+      //$tokenMetadata->validateUserId('123');
+      $tokenMetadata->validateExpiration();
+      // Check to see if we have a 'long lived' token.
+      if (! $accessToken->isLongLived()) {
+        // Exchanges a short-lived access token for a long-lived one
+        try {
+          $accessToken = $oAuth2Client->getLongLivedAccessToken($accessToken);
+        } catch (Facebook\Exceptions\FacebookSDKException $e) {
+
+          return [
+            '#type' => 'markup',
+            '#markup' => "<p>Error getting long-lived access token: " . $e->getMessage() . "</p>\n\n",
+          ];
+        }
+      }
+      // Store the access token in the session for later use.
+      $_SESSION['fb_access_token'] = (string) $accessToken;
+      // Redirect back to the stats page now that we have our token.
+      $response = new RedirectResponse('/social-stats');
+      $response->send();
+      return;
     }
-
-    // The OAuth 2.0 client handler helps us manage access tokens
-    //$oAuth2Client = $fb->getOAuth2Client();
-
-    return [
-      '#type' => 'markup',
-      '#markup' => $message,
-    ];
   }
 }
