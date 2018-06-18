@@ -3,6 +3,7 @@
 namespace Drupal\my_social_stats\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class MySocialStatsController extends ControllerBase {
@@ -51,25 +52,42 @@ class MySocialStatsController extends ControllerBase {
       $message .= "<a href='$loginUrl'>Log in with Facebook.</a></p>";
     }
     else {
-      // Set the default access token so we don't have to send it in with each
-      // request.
-      $this->fb->setDefaultAccessToken($_SESSION['fb_access_token']);
-      $res = $this->fb->get('/me/feed');
-      // Get the first page of results.
-      $feed = $res->getGraphEdge();
+      // Check the cache for data.
+      // @TODO need to add the user to this.
+      $cid = 'my_social_stats_fb_results';
+      $data = NULL;
+      if ($cache = \Drupal::cache()->get($cid)) {
+        $data = $cache->data;
+        dsm('Using cached data.');
+      }
+      else {
+        // Set the default access token so we don't have to send it in with each
+        // request.
+        $this->fb->setDefaultAccessToken($_SESSION['fb_access_token']);
+        $res = $this->fb->get('/me/feed');
+        // Get the first page of results.
+        $data = $res->getGraphEdge();
+        // Cache our results.
+        \Drupal::cache()->set($cid, $data);
+        dsm('Using FB API, caching data.');
+      }
+
 
       // Iterate over the feed and get posts until we hit 30 days back.
       while (!$done) {
-        foreach ($feed as $post) {
-          $date = $post->items['created_time']['date'];
-          $id = $post->items['id'];
-          //ddl("Post $id was posted on $date");
-          $message .= "Post $id was posted on $date \n";
+        foreach ($data as $post) {
+          $array = $post->asArray();
+          $date = $array['created_time']->getTimestamp();
+          dsm($date);
+          $id = $array['id'];
+          //$message .= "Post $id was posted on $date <br>";
         }
         //$next_feed = $this->fb->next($feed);
+        // TESTING
+        $done = TRUE;
       }
 
-      $message = 'access token current.';
+      //$message = 'access token current.';
     }
 
     return [
