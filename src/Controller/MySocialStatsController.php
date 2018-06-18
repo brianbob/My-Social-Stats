@@ -36,12 +36,14 @@ class MySocialStatsController extends ControllerBase {
    */
   public function stats_page() {
     $message = '';
+    $done = FALSE;
+    $this->get_fb_object();
     // If there is no token, provide the user an option to login.
     if (!isset($_SESSION['fb_access_token'])) {
       $this->get_fb_object();
       $helper = $this->fb->getRedirectLoginHelper();
       // Optional permissions
-      $permissions = ['user_location', 'public_profile'];
+      $permissions = ['user_location', 'public_profile', 'user_posts'];
       $callback_url = 'https://brianjbridge.com/fb-callback';
       $loginUrl = $helper->getLoginUrl($callback_url, $permissions);
       // Return our display.
@@ -49,7 +51,24 @@ class MySocialStatsController extends ControllerBase {
       $message .= "<a href='$loginUrl'>Log in with Facebook.</a></p>";
     }
     else {
-      // @todo redirect or do something else here.
+      // Set the default access token so we don't have to send it in with each
+      // request.
+      $this->fb->setDefaultAccessToken($_SESSION['fb_access_token']);
+      $res = $this->fb->get('/me/feed');
+      // Get the first page of results.
+      $feed = $res->getGraphEdge();
+
+      // Iterate over the feed and get posts until we hit 30 days back.
+      while (!$done) {
+        foreach ($feed as $post) {
+          $date = $post->items['created_time']['date'];
+          $id = $post->items['id'];
+          //ddl("Post $id was posted on $date");
+          $message .= "Post $id was posted on $date \n";
+        }
+        //$next_feed = $this->fb->next($feed);
+      }
+
       $message = 'access token current.';
     }
 
