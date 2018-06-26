@@ -15,9 +15,11 @@ class MySocialStatsController extends ControllerBase {
    * [get_fb_object description]
    * @return [type] [description]
    */
-  private function get_fb_object() {
-    // Get the config object.
-    $config = \Drupal::config('my_social_stats.settings');
+  private function get_fb_object($config = NULL) {
+    if(is_null($config)) {
+      // Get the config object.
+      $config = \Drupal::config('my_social_stats.settings');
+    }
     // Get our config values.
     $this->app_id = $config->get('my_social_stats.app_id');
     $this->app_secret = $config->get('my_social_stats.app_secret');
@@ -36,15 +38,19 @@ class MySocialStatsController extends ControllerBase {
    * @return array
    */
   public function stats_page() {
+    $config = \Drupal::config('my_social_stats.settings');
+    $this->get_fb_object($config);
     $message = '';
     $done = FALSE;
-    $this->get_fb_object();
-    // If there is no token, provide the user an option to login.
+    // Get the start date so we know how far back to look for stats.
+    $start_date =  strtotime($config->get('my_social_stats.start_date'));
+    // If there is no stored token, provide the user an option to login.
     if (!isset($_SESSION['fb_access_token'])) {
-      $this->get_fb_object();
+      $this->get_fb_object($config);
       $helper = $this->fb->getRedirectLoginHelper();
       // Optional permissions
       $permissions = ['user_location', 'public_profile', 'user_posts'];
+      // @TODO make this configurable.
       $callback_url = 'https://brianjbridge.com/fb-callback';
       $loginUrl = $helper->getLoginUrl($callback_url, $permissions);
       // Return our display.
@@ -61,33 +67,37 @@ class MySocialStatsController extends ControllerBase {
         dsm('Using cached data.');
       }
       else {
+        $data = array();
         // Set the default access token so we don't have to send it in with each
         // request.
         $this->fb->setDefaultAccessToken($_SESSION['fb_access_token']);
         $res = $this->fb->get('/me/feed');
         // Get the first page of results.
-        $data = $res->getGraphEdge();
-        // Cache our results.
-        \Drupal::cache()->set($cid, $data);
-        dsm('Using FB API, caching data.');
-      }
+        $results = $res->getGraphEdge();
 
-
-      // Iterate over the feed and get posts until we hit 30 days back.
-      while (!$done) {
-        foreach ($data as $post) {
-          $array = $post->asArray();
-          $date = $array['created_time']->getTimestamp();
-          dsm($date);
-          $id = $array['id'];
-          //$message .= "Post $id was posted on $date <br>";
+        // Iterate over the feed and get posts until we hit the start date.
+        while (!$done) {
+          foreach ($results as $post) {
+            // Conver the object to an array for easier processing.
+            $array = $post->asArray();
+            // Get the date the post was submitted.
+            $date = $array['created_time']->getTimestamp();
+            // If the post date is before our start date, end the loop.
+            if($date < $start_date) {
+              $done = TRUE;
+            }
+            // Store the date in our array.
+            $data[$array['id']]['date'] = $date;
+          }
+          // Get the next page of results and continue the loop.
+          $results = $this->fb->next($results);
         }
-        //$next_feed = $this->fb->next($feed);
-        // TESTING
-        $done = TRUE;
+        dpm($data);
+        // Cache our results.
+        dpm('Caching data from the facebook API....');
+        \Drupal::cache()->set($cid, $data);
+        dpm('... done.');
       }
-
-      //$message = 'access token current.';
     }
 
     return [
