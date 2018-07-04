@@ -88,6 +88,19 @@ class MySocialStatsController extends ControllerBase {
             }
             // Store the date in our array.
             $data[$array['id']]['date'] = $date;
+            // Store the results in our database table.
+            //$db = \Drupal::database();
+            $db = Database::getConnection();
+            $db->insert('mss_base')->fields(
+              array(
+                'fid' => $array['id'],
+                'date' => $date,
+                'type' => 'post'
+                'data' => serialize($post),
+                'service' => 'facebook'
+              )
+            )->execute();
+
           }
           // Get the next page of results and continue the loop.
           $results = $this->fb->next($results);
@@ -174,4 +187,11 @@ class MySocialStatsController extends ControllerBase {
       return;
     }
   }
+}
+
+// From core/modules/contextual/contextual.module.
+// @todo Is this where this goes?
+function my_social_stats_page_attachments(array &$page) {
+  $page['#attached']['library'][] = 'my_social_stats/google-charts';
+  //$page['#attached']['library'][] = 'contextual/drupal.contextual-links';
 }

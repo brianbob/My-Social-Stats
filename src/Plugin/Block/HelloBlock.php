@@ -18,6 +18,31 @@ use Drupal\Core\Form\FormStateInterface;
 class HelloBlock extends BlockBase implements BlockPluginInterface {
 
   public function build() {
+
+    $chart = array(
+      '#type' => 'chart',
+      '#chart_type' => 'scatter',
+      '#chart_library' => 'google', // Allowed values: 'google' or 'highcharts'
+      '#title' => t('Scatter Chart'),
+    );
+    $chart['male'] = array(
+      '#type' => 'chart_data',
+      '#title' => t('Male'),
+      '#data' => array(array(10, 10), array(20, 20), array(30, 30)),
+    );
+    $chart['female'] = array(
+      '#type' => 'chart_data',
+      '#title' => t('Female'),
+      '#data' => array(array(12, 12), array(20, 24), array(30, 36)),
+    );
+
+    $example['chart'] = $chart;
+
+    return array(
+      //'#markup' => $this->t('TEST'),//drupal_render($example),
+      '#markup' => drupal_render($example),
+    );
+  /*
     return array(
       '#markup' => $this->t('Hello World!'),
       // Don't think I need these lines?
@@ -29,6 +54,7 @@ class HelloBlock extends BlockBase implements BlockPluginInterface {
         ),
       ),
     );
+    */
   }
 
   public function blockForm($form, FormStateInterface $form_state) {

@@ -1,12 +1,12 @@
-mss-test:
+google-charts:
   version: 1.x
-  css:
-    layout:
-      css/mss-test-layout.css: {}
-    theme:
-      css/mss-test-theme.css: {}
+#  css:
+#    layout:
+#      css/mss-test-layout.css: {}
+#    theme:
+#      css/mss-test-theme.css: {}
   js:
-    js/mss-test.js: {}
+    https://www.gstatic.com/charts/loader.js: { type: external, minified: false }
   dependencies:
     - core/jquery
 

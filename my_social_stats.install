@@ -1,0 +1,61 @@
+<?php
+
+function my_social_stats_schema() {
+  // @todo come up with a better name and/or schema.
+  $schema['mss_base'] = array(
+    //
+    'description' => 'The base table for facebook stats',
+    'fields' => array(
+      'rid' => array(
+        'description' => 'The primary identifier for a record.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'fid' => array(
+        'description' => 'The service-specific id for the record',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      // @todo ...do I need this? should this be stored in the data field? The
+      //       date could change depending on what platform and what type
+      //       of data we're talking about....
+      'date' => array(
+        'description' => 'The date of the data we are storing. ',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'type' => array(
+        'description' => 'The type of record',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'data' => array(
+        'description' => 'The data',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'service' => array(
+        'description' => 'The service we are getting the data from. ',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array(
+      'rid',
+    ),
+  );
+
+
+  return $schema;
+}
