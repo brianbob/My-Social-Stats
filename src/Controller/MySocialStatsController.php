@@ -5,6 +5,8 @@ namespace Drupal\my_social_stats\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\my_social_stats\SocialStats\FacebookStats;
+
 
 class MySocialStatsController extends ControllerBase {
   private $fb;
@@ -38,6 +40,12 @@ class MySocialStatsController extends ControllerBase {
    * @return array
    */
   public function stats_page() {
+
+    $test = new FacebookStats();
+        return [
+      '#type' => 'markup',
+      '#markup' => $this->t('test'),
+    ];
     $config = \Drupal::config('my_social_stats.settings');
     $this->get_fb_object($config);
     $message = '';
@@ -95,7 +103,7 @@ class MySocialStatsController extends ControllerBase {
               array(
                 'fid' => $array['id'],
                 'date' => $date,
-                'type' => 'post'
+                'type' => 'post',
                 'data' => serialize($post),
                 'service' => 'facebook'
               )
