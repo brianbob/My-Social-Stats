@@ -9,6 +9,7 @@ abstract class BaseStats {
    }
 
    abstract public function logIn();
+   abstract public function callback();
    abstract public function getData();
    abstract public function displayGraphs();
 

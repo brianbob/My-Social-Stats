@@ -15,7 +15,7 @@ function my_social_stats_schema() {
       'fid' => array(
         'description' => 'The service-specific id for the record',
         'type' => 'varchar',
-        'length' => 32,
+        'length' => 64,
         'not null' => TRUE,
         'default' => '',
       ),
@@ -38,10 +38,9 @@ function my_social_stats_schema() {
       ),
       'data' => array(
         'description' => 'The data',
-        'type' => 'varchar',
-        'length' => 32,
+        'type' => 'text',
         'not null' => TRUE,
-        'default' => '',
+        'serialize' => TRUE,
       ),
       'service' => array(
         'description' => 'The service we are getting the data from. ',
