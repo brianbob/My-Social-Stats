@@ -44,10 +44,3 @@ class MySocialStatsController extends ControllerBase {
     ];
   }
 }
-
-// From core/modules/contextual/contextual.module.
-// @todo Is this where this goes?
-function my_social_stats_page_attachments(array &$page) {
-  $page['#attached']['library'][] = 'my_social_stats/google-charts';
-  //$page['#attached']['library'][] = 'contextual/drupal.contextual-links';
-}

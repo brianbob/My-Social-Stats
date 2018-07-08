@@ -1,0 +1,8 @@
+<?php
+
+// From core/modules/contextual/contextual.module.
+function my_social_stats_page_attachments(array &$page) {
+  ddl('page-attachments', 'page attachments');
+  $page['#attached']['library'][] = 'my_social_stats/google-charts';
+  //$page['#attached']['library'][] = 'contextual/drupal.contextual-links';
+}
