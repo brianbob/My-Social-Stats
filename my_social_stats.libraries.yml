@@ -1,22 +1,14 @@
-google-charts:
-  version: 1.x
-#  css:
-#    layout:
-#      css/mss-test-layout.css: {}
-#    theme:
-#      css/mss-test-theme.css: {}
+google-charts-core:
+  version: VERSION
   js:
-    https://www.gstatic.com/charts/loader.js: { type: external, minified: false }
+    https://www.gstatic.com/charts/loader.js: { type: external }
   dependencies:
     - core/jquery
 
-# Including for example later. We'll need to do something like this to get our charts and what not
-# included
-#  remote: https://github.com/angular/angular.js
-# version: 1.4.4
-#  license:
-#    name: MIT
-#    url: https://github.com/angular/angular.js/blob/master/LICENSE
-#    gpl-compatible: true
-#  js:
-#    https://ajax.googleapis.com/ajax/libs/angularjs/1.4.4/angular.min.js: { type: external, minified: true }
+google-charts-custom:
+  version: VERSION
+  js:
+    js/google-charts.js: {}
+  dependencies:
+    - core/jquery
+
