@@ -5,6 +5,7 @@ namespace Drupal\my_social_stats\Plugin\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\my_social_stats\SocialStats\FacebookStats;
 
 /**
  * Provides a Facebook stats Block.
@@ -18,9 +19,10 @@ use Drupal\Core\Form\FormStateInterface;
 class FacebookBlock extends BlockBase implements BlockPluginInterface {
 
   public function build() {
-
+    //$test = new FacebookStats();
+    //$status = $test->logIn();
     return array(
-      '#markup' => $this->t('Hello World!'),
+      '#markup' => $this->t('<div id="chart_div"></div>'),
       '#attached' => array(
         'library' => array(
           'my_social_stats/google-charts-core',

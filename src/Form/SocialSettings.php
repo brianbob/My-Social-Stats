@@ -4,6 +4,7 @@ namespace Drupal\my_social_stats\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\my_social_stats\SocialStats\FacebookStats;
 
 class SocialSettings extends ConfigFormBase {
 
@@ -20,6 +21,7 @@ class SocialSettings extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Form constructor.
     $form = parent::buildForm($form, $form_state);
+    $facebook = new FacebookStats();
     // Default settings.
     $config = $this->config('my_social_stats.settings');
     // App ID field.
@@ -45,6 +47,12 @@ class SocialSettings extends ConfigFormBase {
       '#date_increment' => 1,
       '#date_year_range' => '-3:+3',
     );
+
+    $form['facebook_login'] = array(
+      '#type' => 'markup',
+      '#markup' => $facebook->getLoginLink(),
+    );
+
 
     return $form;
   }

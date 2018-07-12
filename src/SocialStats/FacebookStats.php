@@ -12,10 +12,13 @@ class FacebookStats extends BaseStats {
   private $app_id;
   private $app_secret;
 
-   function __construct($config = NULL) {
-     parent::__construct();
+   /*
+    *
+    */
+  function __construct($config = NULL) {
+    parent::__construct();
 
-     if(is_null($config)) {
+    if(is_null($config)) {
       // Get the config object.
       $config = \Drupal::config('my_social_stats.settings');
     }
@@ -31,7 +34,20 @@ class FacebookStats extends BaseStats {
     ]);
    }
 
-   public function logIn() {
+  /*
+   *
+   */
+  public function amILoggedIn() {
+    if(isset($_SESSION['fb_access_token'])) {
+      return TRUE;
+    }
+    return FALSE;
+   }
+
+  /*
+   *
+   */
+  public function getLoginLink() {
     $config = \Drupal::config('my_social_stats.settings');
     //$this->get_fb_object($config);
     $done = FALSE;
@@ -47,11 +63,15 @@ class FacebookStats extends BaseStats {
       $callback_url = 'https://brianjbridge.com/fb-callback';
       $loginUrl = $helper->getLoginUrl($callback_url, $permissions);
       // Redirect us to Facebook for login.
-      return "<a href='$loginUrl'>Login with Facebook</a>";
+      $classes = 'class="button button--primary js-form-submit form-submit"';
+      return "<a href='$loginUrl' $classes>Login with Facebook</a>";
     }
-    return NULL;
+    return '<p>You are currently logged in to Facebook.';
    }
 
+  /*
+   *
+   */
   public function callback() {
     $message = '';
     //$this->get_fb_object();
@@ -67,9 +87,8 @@ class FacebookStats extends BaseStats {
       return 'Facebook SDK returned an error: ' . $e->getMessage();
     }
 
-    if (! isset($accessToken)) {
+    if (!isset($accessToken)) {
       if ($helper->getError()) {
-        header('HTTP/1.0 401 Unauthorized');
         $message .=  "Error: " . $helper->getError() . "\n";
         $message .=  "Error Code: " . $helper->getErrorCode() . "\n";
         $message .=  "Error Reason: " . $helper->getErrorReason() . "\n";
@@ -96,73 +115,71 @@ class FacebookStats extends BaseStats {
         try {
           $accessToken = $oAuth2Client->getLongLivedAccessToken($accessToken);
         } catch (Facebook\Exceptions\FacebookSDKException $e) {
-
           return "Error getting long-lived access token: " . $e->getMessage();
         }
       }
       // Store the access token in the session for later use.
+      // @todo should we store this in a database table until it expires?
       $_SESSION['fb_access_token'] = (string) $accessToken;
     }
     return $message;
   }
 
-   public function getData() {    // If we are logged in, get some stats.
-    // First, Check the cache for data.
-    // @TODO need to add the user to this.
-    $cid = 'my_social_stats_fb_results';
-    $data = NULL;
-    if ($cache = \Drupal::cache()->get($cid)) {
-      $data = $cache->data;
-      dsm('Using cached data.');
-    }
-    else {
-      $data = array();
-      // Set the default access token so we don't have to send it in with each
-      // request.
-      $this->fb->setDefaultAccessToken($_SESSION['fb_access_token']);
-      $res = $this->fb->get('/me/feed');
-      // Get the first page of results.
-      $results = $res->getGraphEdge();
+  /*
+   *
+   */
+  public function getData() {
+    // If we are logged in, get some stats.
+    $data = array();
+    // Set the default access token so we don't have to send it in with each
+    // request.
+    $this->fb->setDefaultAccessToken($_SESSION['fb_access_token']);
+    $res = $this->fb->get('/me/feed');
+    // Get the first page of results.
+    $results = $res->getGraphEdge();
 
-      // Iterate over the feed and get posts until we hit the start date.
-      while (!$done) {
-        foreach ($results as $post) {
-          // Conver the object to an array for easier processing.
-          $array = $post->asArray();
-          // Get the date the post was submitted.
-          $date = $array['created_time']->getTimestamp();
-          // If the post date is before our start date, end the loop.
-          if($date < $start_date) {
-            $done = TRUE;
-          }
-          // Store the date in our array.
-          $data[$array['id']]['date'] = $date;
-          // Store the results in our database table.
-          $db = Database::getConnection();
-          $db->insert('mss_base')->fields(
-            array(
-              'fid' => $array['id'],
-              'date' => $date,
-              'type' => 'post',
-              'data' => serialize($post),
-              'service' => 'facebook'
-            )
-          )->execute();
-
+    // Iterate over the feed and get posts until we hit the start date.
+    while (!$done) {
+      foreach ($results as $post) {
+        // Conver the object to an array for easier processing.
+        $array = $post->asArray();
+        // Get the date the post was submitted.
+        $date = $array['created_time']->getTimestamp();
+        // If the post date is before our start date, end the loop.
+        if($date < $start_date) {
+          $done = TRUE;
+          continue;
         }
-        // Get the next page of results and continue the loop.
-        $results = $this->fb->next($results);
+        // Store the date in our array.
+        $data[$array['id']]['date'] = $date;
+        // Store the results in our database table.
+        $db = Database::getConnection();
+        $db->merge('example')
+          ->insertFields([
+            'fid' => $array['id'],
+            'date' => $date,
+            'type' => 'post',
+            'data' => serialize($post),
+            'service' => 'facebook',
+            'uid' => \Drupal::currentUser()->id(),
+          ])
+          ->updateFields([
+            'date' => $date,
+            'type' => 'post',
+            'data' => serialize($post),
+          ])
+          ->key(['fid' => $array['id']])
+          ->execute();
       }
-      dpm($data);
-      // Cache our results.
-      dpm('Caching data from the facebook API....');
-      \Drupal::cache()->set($cid, $data);
-      dpm('... done.');
+      // Get the next page of results and continue the loop.
+      $results = $this->fb->next($results);
     }
-   }
+  }
 
-   public function displayGraphs() {
+  /*
+   *
+   */
+  public function displayGraphs() {
     return;
-   }
-
+  }
 } // end of class

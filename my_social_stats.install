@@ -49,12 +49,16 @@ function my_social_stats_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'uid' => array(
+        'description' => 'The user this data belongs to. ',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
     ),
     'primary key' => array(
       'rid',
     ),
   );
-
 
   return $schema;
 }
