@@ -11,6 +11,6 @@ abstract class BaseStats {
    abstract public function getLoginLink();
    abstract public function callback();
    abstract public function getData();
-   abstract public function displayGraphs();
+   //abstract public function displayGraphs();
 
 } // end of class

@@ -179,7 +179,23 @@ class FacebookStats extends BaseStats {
   /*
    *
    */
-  public function displayGraphs() {
+  public function displayPostGraph() {
+
+    $build['#attached']['drupalSettings']['testvar'] = $testVariable;
+    return;
+  }
+
+  /*
+   *
+   */
+  public function displayGraph2() {
+    return;
+  }
+
+  /*
+   *
+   */
+  public function displayPostGraph3() {
     return;
   }
 } // end of class
