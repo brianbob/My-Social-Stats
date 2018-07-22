@@ -24,11 +24,13 @@ class SocialSettings extends ConfigFormBase {
     $facebook = new FacebookStats();
     // Default settings.
     $config = $this->config('my_social_stats.settings');
+    $app_id = $config->get('my_social_stats.app_id');
+    $app_secret = $config->get('my_social_stats.app_secret');
     // App ID field.
     $form['app_id'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('App ID:'),
-      '#default_value' => $config->get('my_social_stats.app_id'),
+      '#default_value' => $app_id,
     );
     // App secret field
     $form['app_secret'] = array(
@@ -40,7 +42,7 @@ class SocialSettings extends ConfigFormBase {
     $form['start_date'] = array(
       '#type' => 'date',
       '#title' => $this->t('Start Date:'),
-      '#default_value' => $config->get('my_social_stats.start_date'),
+      '#default_value' => $app_id,
       '#date_format' => 'Y-m-d',
       '#date_type' => DATE_DATETIME,
       //'#date_timezone' => date_default_timezone(),
@@ -48,10 +50,18 @@ class SocialSettings extends ConfigFormBase {
       '#date_year_range' => '-3:+3',
     );
 
-    $form['facebook_login'] = array(
-      '#type' => 'markup',
-      '#markup' => $facebook->getLoginLink(),
-    );
+    if(isset($app_id) && isset($app_secret)) {
+      $form['facebook_login'] = array(
+        '#type' => 'markup',
+        '#markup' => $facebook->getLoginLink(),
+      );
+    }
+    else {
+      $form['facebook_login'] = array(
+        '#type' => 'markup',
+        '#markup' => "Please set your app ID and secret to generate a Facebook login link",
+      );
+    }
 
 
     return $form;

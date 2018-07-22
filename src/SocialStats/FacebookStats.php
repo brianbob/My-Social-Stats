@@ -22,16 +22,23 @@ class FacebookStats extends BaseStats {
       // Get the config object.
       $config = \Drupal::config('my_social_stats.settings');
     }
+    $app_secret = $config->get('my_social_stats.app_secret');
+    $app_id = $config->get('my_social_stats.app_id');
     // Get our config values.
-    $this->app_id = $config->get('my_social_stats.app_id');
-    $this->app_secret = $config->get('my_social_stats.app_secret');
-    // create and return the facebook object.
-    $this->fb = new \Facebook\Facebook([
-      'app_id' => $this->app_id,
-      'app_secret' => $this->app_secret,
-      'default_graph_version' => 'v2.10',
-      //'default_access_token' => '{access-token}', // optional
-    ]);
+    $this->app_id = $app_id;
+    $this->app_secret = $app_secret;
+    if (isset($app_id) && isset($app_secret)) {
+      // create and return the facebook object.
+      $this->fb = new \Facebook\Facebook([
+        'app_id' => $this->app_id,
+        'app_secret' => $this->app_secret,
+        'default_graph_version' => 'v2.10',
+        //'default_access_token' => '{access-token}', // optional
+      ]);
+    }
+    else {
+      // What do we do here? Nothing? error message?
+    }
    }
 
   /*
@@ -49,10 +56,6 @@ class FacebookStats extends BaseStats {
    */
   public function getLoginLink() {
     $config = \Drupal::config('my_social_stats.settings');
-    //$this->get_fb_object($config);
-    $done = FALSE;
-    // Get the start date so we know how far back to look for stats.
-    $start_date =  strtotime($config->get('my_social_stats.start_date'));
     // If there is no stored token, provide the user an option to login.
     if (!isset($_SESSION['fb_access_token'])) {
       //$this->get_fb_object($config);
@@ -129,6 +132,9 @@ class FacebookStats extends BaseStats {
    *
    */
   public function getData() {
+    $done = FALSE;
+    // Get the start date so we know how far back to look for stats.
+    $start_date =  strtotime($config->get('my_social_stats.start_date'));
     // If we are logged in, get some stats.
     $data = array();
     // Set the default access token so we don't have to send it in with each
