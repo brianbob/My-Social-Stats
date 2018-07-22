@@ -133,6 +133,7 @@ class FacebookStats extends BaseStats {
    */
   public function getData() {
     $done = FALSE;
+    $config = \Drupal::config('my_social_stats.settings');
     // Get the start date so we know how far back to look for stats.
     $start_date =  strtotime($config->get('my_social_stats.start_date'));
     // If we are logged in, get some stats.
@@ -140,10 +141,10 @@ class FacebookStats extends BaseStats {
     // Set the default access token so we don't have to send it in with each
     // request.
     $this->fb->setDefaultAccessToken($_SESSION['fb_access_token']);
-    $res = $this->fb->get('/me/feed');
+    // Get my posts.
+    $res = $this->fb->get('/me/posts');
     // Get the first page of results.
     $results = $res->getGraphEdge();
-
     // Iterate over the feed and get posts until we hit the start date.
     while (!$done) {
       foreach ($results as $post) {
@@ -158,10 +159,12 @@ class FacebookStats extends BaseStats {
         }
         // Store the date in our array.
         $data[$array['id']]['date'] = $date;
-        // Store the results in our database table.
+        // Store the results in our database table. If the record already exists
+        // update the record instead of adding a duplicate.
         $db = Database::getConnection();
-        $db->merge('example')
+        $db->merge('mss_base')
           ->insertFields([
+            //'description' => '',
             'fid' => $array['id'],
             'date' => $date,
             'type' => 'post',

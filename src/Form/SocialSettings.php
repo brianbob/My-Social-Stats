@@ -22,6 +22,7 @@ class SocialSettings extends ConfigFormBase {
     // Form constructor.
     $form = parent::buildForm($form, $form_state);
     $facebook = new FacebookStats();
+     $message = "Please set your app ID and secret to generate a Facebook login link";
     // Default settings.
     $config = $this->config('my_social_stats.settings');
     $app_id = $config->get('my_social_stats.app_id');
@@ -36,34 +37,35 @@ class SocialSettings extends ConfigFormBase {
     $form['app_secret'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('App Secret:'),
-      '#default_value' => $config->get('my_social_stats.app_secret'),
+      '#default_value' => $app_secret,
     );
     // Start Date field
     $form['start_date'] = array(
       '#type' => 'date',
       '#title' => $this->t('Start Date:'),
-      '#default_value' => $app_id,
+      '#default_value' => $config->get('my_social_stats.start_date'),
       '#date_format' => 'Y-m-d',
-      '#date_type' => DATE_DATETIME,
-      //'#date_timezone' => date_default_timezone(),
       '#date_increment' => 1,
       '#date_year_range' => '-3:+3',
     );
-
+    // Check to make sure the app credentials are set before using our FB class.
     if(isset($app_id) && isset($app_secret)) {
-      $form['facebook_login'] = array(
-        '#type' => 'markup',
-        '#markup' => $facebook->getLoginLink(),
-      );
-    }
-    else {
-      $form['facebook_login'] = array(
-        '#type' => 'markup',
-        '#markup' => "Please set your app ID and secret to generate a Facebook login link",
-      );
+      if($facebook->amILoggedIn()) {
+        // If we're logged in, get update our data.
+        // @TODO make this configurable. I'm thinking a 'refresh' button?
+        $facebook->getData();
+        $message = "You are logged in. Your data has been refreshed.";
+      }
+      else {
+        // If we're not logged in get a login link.
+        $message =  $facebook->getLoginLink();
+      }
     }
 
-
+    $form['facebook_login'] = array(
+      '#type' => 'markup',
+      '#markup' => $message,
+    );
     return $form;
   }
 
