@@ -19,8 +19,12 @@ use Drupal\my_social_stats\SocialStats\FacebookStats;
 class FacebookBlock extends BlockBase implements BlockPluginInterface {
 
   public function build() {
-    //$test = new FacebookStats();
-    //$status = $test->logIn();
+
+    $fb = new FacebookStats();
+    //$fb->getData();
+    // Check for login here? or in class?
+    $status = $fb->displayPostGraph();
+
     return array(
       '#markup' => $this->t('<div id="chart_div"></div>'),
       '#attached' => array(
