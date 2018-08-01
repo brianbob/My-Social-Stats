@@ -61,7 +61,7 @@ class FacebookStats extends BaseStats {
       //$this->get_fb_object($config);
       $helper = $this->fb->getRedirectLoginHelper();
       // Optional permissions
-      $permissions = ['user_location', 'public_profile', 'user_posts'];
+      $permissions = ['user_location', 'public_profile', 'user_posts', 'user_likes', 'user_friends'];
       // @TODO make this configurable.
       $callback_url = 'https://brianjbridge.com/fb-callback';
       $loginUrl = $helper->getLoginUrl($callback_url, $permissions);
@@ -136,8 +136,6 @@ class FacebookStats extends BaseStats {
     $config = \Drupal::config('my_social_stats.settings');
     // Get the start date so we know how far back to look for stats.
     $start_date =  strtotime($config->get('my_social_stats.start_date'));
-    // If we are logged in, get some stats.
-    $data = array();
     // Set the default access token so we don't have to send it in with each
     // request.
     $this->fb->setDefaultAccessToken($_SESSION['fb_access_token']);
@@ -157,8 +155,22 @@ class FacebookStats extends BaseStats {
           $done = TRUE;
           continue;
         }
-        // Store the date in our array.
-        $data[$array['id']]['date'] = $date;
+        // Get the likes for this post.
+        $likes_request = $this->fb->get('/'. $array['id'] . '/likes');
+        $likes_results = $likes_request->getDecodedBody();
+        //ddl(print_r($likes_results, TRUE), 'likes');
+        ddl(print_r($likes_request, TRUE), 'likes');
+        ddl(print_r($array, TRUE), 'post');
+        return;
+        $array['likes'] = count($likes_results);
+        // Get the shares for this post.
+        $shares_request = $this->fb->get('/'. $array['id'] . '/sharedposts');
+        $shares_results = $shares_request->getDecodedBody();
+        $array['shares'] = count($shares_results);
+        // Get the comments for this post.
+        $comments_request = $this->fb->get('/'. $array['id'] . '/comments');
+        $comments_results = $comments_request->getDecodedBody();
+        $array['comments'] = count($comments_results);
         // Store the results in our database table. If the record already exists
         // update the record instead of adding a duplicate.
         $db = Database::getConnection();
@@ -168,14 +180,14 @@ class FacebookStats extends BaseStats {
             'fid' => $array['id'],
             'date' => $date,
             'type' => 'post',
-            'data' => serialize($post),
+            'data' => serialize($array),
             'service' => 'facebook',
             'uid' => \Drupal::currentUser()->id(),
           ])
           ->updateFields([
             'date' => $date,
             'type' => 'post',
-            'data' => serialize($post),
+            'data' => serialize($array),
           ])
           ->key(['fid' => $array['id']])
           ->execute();
@@ -189,9 +201,22 @@ class FacebookStats extends BaseStats {
    *
    */
   public function displayPostGraph() {
-
-    $build['#attached']['drupalSettings']['testvar'] = $testVariable;
     return;
+    $data_array = [];
+    //$build['#attached']['drupalSettings']['testvar'] = $testVariable;
+    $db = Database::getConnection();
+    $query = $db->select('mss_base', 'm')->fields('m');
+    $data = $query->execute();
+    $results = $data->fetchAll(\PDO::FETCH_OBJ);
+    //ddl($results);
+
+    foreach ($results as $result) {
+      $data = unserialize($result->data);
+      ddl(print_r($data, TRUE), 'data');
+      //$month = date('M', $result->date);
+      //isset($data_array[$month]) ? $data_array[$month] += 1 : $data_array[$month] = 0;
+    }
+    //ddl($data_array);
   }
 
   /*
