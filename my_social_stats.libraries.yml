@@ -4,6 +4,7 @@ google-charts-core:
     https://www.gstatic.com/charts/loader.js: { type: external }
   dependencies:
     - core/jquery
+    - core/drupalSettings
 
 google-charts-custom:
   version: VERSION
@@ -11,4 +12,5 @@ google-charts-custom:
     js/google-charts.js: {}
   dependencies:
     - core/jquery
+    - core/drupalSettings
 

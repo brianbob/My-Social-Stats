@@ -1,5 +1,6 @@
-(function ($) {
+(function ($, Drupal, drupalSettings) {
   $(document).ready(function() {
+
 
     // Taken from: https://developers.google.com/chart/interactive/docs/quick_start
     // Load the Visualization API and the corechart package.
@@ -7,7 +8,6 @@
 
     // Set a callback to run when the Google Visualization API is loaded.
     google.charts.setOnLoadCallback(drawChart);
-
     // Callback that creates and populates a data table,
     // instantiates the pie chart, passes in the data and
     // draws it.
@@ -17,6 +17,7 @@
       var data = new google.visualization.DataTable();
       data.addColumn('string', 'Topping');
       data.addColumn('number', 'Slices');
+      /*
       data.addRows([
         ['Mushrooms', 3],
         ['Onions', 1],
@@ -24,6 +25,14 @@
         ['Zucchini', 1],
         ['Pepperoni', 2]
       ]);
+      */
+      var data_array = drupalSettings.facebook_block.facebook_posts;
+      //console.log('test');
+      //console.log(test);
+
+      for (var month in data_array) {
+        data.addRow([month, data_array[month]]);
+      }
 
       // Set chart options
       var options = {'title':'How Much Pizza I Ate Last Night',
@@ -35,4 +44,4 @@
       chart.draw(data, options);
     }
   });
-}(jQuery));
+}(jQuery, Drupal, drupalSettings));

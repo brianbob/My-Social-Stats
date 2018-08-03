@@ -155,22 +155,6 @@ class FacebookStats extends BaseStats {
           $done = TRUE;
           continue;
         }
-        // Get the likes for this post.
-        $likes_request = $this->fb->get('/'. $array['id'] . '/likes');
-        $likes_results = $likes_request->getDecodedBody();
-        //ddl(print_r($likes_results, TRUE), 'likes');
-        ddl(print_r($likes_request, TRUE), 'likes');
-        ddl(print_r($array, TRUE), 'post');
-        return;
-        $array['likes'] = count($likes_results);
-        // Get the shares for this post.
-        $shares_request = $this->fb->get('/'. $array['id'] . '/sharedposts');
-        $shares_results = $shares_request->getDecodedBody();
-        $array['shares'] = count($shares_results);
-        // Get the comments for this post.
-        $comments_request = $this->fb->get('/'. $array['id'] . '/comments');
-        $comments_results = $comments_request->getDecodedBody();
-        $array['comments'] = count($comments_results);
         // Store the results in our database table. If the record already exists
         // update the record instead of adding a duplicate.
         $db = Database::getConnection();
@@ -201,7 +185,6 @@ class FacebookStats extends BaseStats {
    *
    */
   public function displayPostGraph() {
-    return;
     $data_array = [];
     //$build['#attached']['drupalSettings']['testvar'] = $testVariable;
     $db = Database::getConnection();
@@ -212,11 +195,11 @@ class FacebookStats extends BaseStats {
 
     foreach ($results as $result) {
       $data = unserialize($result->data);
-      ddl(print_r($data, TRUE), 'data');
-      //$month = date('M', $result->date);
-      //isset($data_array[$month]) ? $data_array[$month] += 1 : $data_array[$month] = 0;
+      //ddl(print_r($data, TRUE), 'data');
+      $month = date('M', $result->date);
+      isset($data_array[$month]) ? $data_array[$month] += 1 : $data_array[$month] = 0;
     }
-    //ddl($data_array);
+    return $data_array;
   }
 
   /*

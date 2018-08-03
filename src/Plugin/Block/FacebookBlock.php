@@ -23,7 +23,7 @@ class FacebookBlock extends BlockBase implements BlockPluginInterface {
     $fb = new FacebookStats();
     //$fb->getData();
     // Check for login here? or in class?
-    $status = $fb->displayPostGraph();
+    $data = $fb->displayPostGraph();
 
     return array(
       '#markup' => $this->t('<div id="chart_div"></div>'),
@@ -31,6 +31,11 @@ class FacebookBlock extends BlockBase implements BlockPluginInterface {
         'library' => array(
           'my_social_stats/google-charts-core',
           'my_social_stats/google-charts-custom',
+        ),
+        'drupalSettings' => array(
+          'facebook_block' => array(
+            'facebook_posts' => $data,
+          ),
         ),
       ),
     );
