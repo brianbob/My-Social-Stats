@@ -197,7 +197,7 @@ class FacebookStats extends BaseStats {
       $data = unserialize($result->data);
       //ddl(print_r($data, TRUE), 'data');
       $month = date('M', $result->date);
-      isset($data_array[$month]) ? $data_array[$month] += 1 : $data_array[$month] = 0;
+      isset($data_array[$month]) ? $data_array[$month] += 1.0 : $data_array[$month] = 0.0;
     }
     return $data_array;
   }
