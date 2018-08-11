@@ -186,19 +186,20 @@ class FacebookStats extends BaseStats {
    */
   public function displayPostGraph() {
     $data_array = [];
-    //$build['#attached']['drupalSettings']['testvar'] = $testVariable;
+    // Query for the data.
     $db = Database::getConnection();
     $query = $db->select('mss_base', 'm')->fields('m');
     $data = $query->execute();
     $results = $data->fetchAll(\PDO::FETCH_OBJ);
-    //ddl($results);
-
+    // Add the first entry to our data array which will serve as our chart headers.
+    $data_array['Month'] = "Posts";
+    // Here we are compiling the data from the query.
     foreach ($results as $result) {
       $data = unserialize($result->data);
-      //ddl(print_r($data, TRUE), 'data');
       $month = date('M', $result->date);
-      isset($data_array[$month]) ? $data_array[$month] += 1.0 : $data_array[$month] = 0.0;
+      isset($data_array[$month]) ? $data_array[$month] += 1 : $data_array[$month] = 0;
     }
+
     return $data_array;
   }
 

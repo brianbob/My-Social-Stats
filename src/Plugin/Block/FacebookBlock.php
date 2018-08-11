@@ -26,7 +26,7 @@ class FacebookBlock extends BlockBase implements BlockPluginInterface {
     $data = $fb->displayPostGraph();
 
     return array(
-      '#markup' => $this->t('<div id="chart_div"></div>'),
+      '#markup' => $this->t('<div class="facebook-chart-container"><div class="title">Facebook Posts by Month</div><div id=facebook_posts_chart_div></div></div>'),
       '#attached' => array(
         'library' => array(
           'my_social_stats/google-charts-core',
