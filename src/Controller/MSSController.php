@@ -17,9 +17,10 @@ class MSSController extends ControllerBase {
     $facebook = new FacebookStats();
     // Get and save our access token, and record any error messages.
     $error_messages = $facebook->callback();
+    // If there are no errors, get the data from facebook.
     if (empty($error_messages)) {
       // Get and save the facebook data!
-      $facebook->getData();
+      $facebook->getDataFromFacebook();
       $message = 'Now authenticated with Facebook!';
     }
     else {

@@ -131,50 +131,37 @@ class FacebookStats extends BaseStats {
   /*
    *
    */
-  public function getData() {
+  public function getDataFromFacebook() {
     $done = FALSE;
+    // Get the Drupal config object so we can load our settings.
     $config = \Drupal::config('my_social_stats.settings');
     // Get the start date so we know how far back to look for stats.
     $start_date =  strtotime($config->get('my_social_stats.start_date'));
     // Set the default access token so we don't have to send it in with each
     // request.
     $this->fb->setDefaultAccessToken($_SESSION['fb_access_token']);
-    // Get my posts.
+    // Get the first page of user's facebook posts from the API.
     $res = $this->fb->get('/me/posts');
-    // Get the first page of results.
     $results = $res->getGraphEdge();
-    // Iterate over the feed and get posts until we hit the start date.
+    // Keep getting posts from facebook until we hit our date limit.
     while (!$done) {
+      // Iterate over the posts returned in this set of results.
       foreach ($results as $post) {
         // Conver the object to an array for easier processing.
-        $array = $post->asArray();
-        // Get the date the post was submitted.
-        $date = $array['created_time']->getTimestamp();
+        $data = $post->asArray();
         // If the post date is before our start date, end the loop.
-        if($date < $start_date) {
+        if($data['created_time']->getTimestamp() < $start_date) {
           $done = TRUE;
           continue;
         }
-        // Store the results in our database table. If the record already exists
-        // update the record instead of adding a duplicate.
-        $db = Database::getConnection();
-        $db->merge('mss_base')
-          ->insertFields([
-            //'description' => '',
-            'fid' => $array['id'],
-            'date' => $date,
-            'type' => 'post',
-            'data' => serialize($array),
-            'service' => 'facebook',
-            'uid' => \Drupal::currentUser()->id(),
-          ])
-          ->updateFields([
-            'date' => $date,
-            'type' => 'post',
-            'data' => serialize($array),
-          ])
-          ->key(['fid' => $array['id']])
-          ->execute();
+        // Get likes on the post.
+        $likes_metadata = $this->fb->get('/' . $data['id'] . '/likes?summary=true')->getGraphEdge()->getMetaData();
+        $data['likes'] = $likes_metadata['summary']['total_count'];
+        // Get the reactions on the post.
+        $reactions_metadata = $this->fb->get('/' . $data['id'] . '/reactions?summary=true')->getGraphEdge()->getMetaData();
+        $data['reactions'] = $reactions_metadata['summary']['total_count'];
+        // Save the data.
+        $this->saveRecord($data);
       }
       // Get the next page of results and continue the loop.
       $results = $this->fb->next($results);
@@ -182,19 +169,15 @@ class FacebookStats extends BaseStats {
   }
 
   /*
-   *
+   * Dis
    */
   public function displayPostGraph() {
     $data_array = [];
-    // Query for the data.
-    $db = Database::getConnection();
-    $query = $db->select('mss_base', 'm')->fields('m');
-    $data = $query->execute();
-    $results = $data->fetchAll(\PDO::FETCH_OBJ);
+    $fb_data = $this->getData('facebook');
     // Add the first entry to our data array which will serve as our chart headers.
     $data_array['Month'] = "Posts";
     // Here we are compiling the data from the query.
-    foreach ($results as $result) {
+    foreach ($fb_data as $result) {
       $data = unserialize($result->data);
       $month = date('M', $result->date);
       isset($data_array[$month]) ? $data_array[$month] += 1 : $data_array[$month] = 0;
@@ -206,14 +189,46 @@ class FacebookStats extends BaseStats {
   /*
    *
    */
-  public function displayGraph2() {
+  public function displayLikesGraph() {
     return;
   }
 
   /*
    *
    */
-  public function displayPostGraph3() {
+  public function displayReactionsGraph() {
     return;
   }
+
+  /*
+   *
+   */
+  public function displaySharesGraph() {
+    return;
+  }
+
+
+  public function saveRecord($data) {
+    // Store the results in our database table. If the record already exists
+    // update the record instead of adding a duplicate.
+    $db = Database::getConnection();
+    $db->merge('mss_base')
+      ->insertFields([
+        //'description' => '',
+        'fid' => $data['id'],
+        'date' => $data['created_time']->getTimestamp(),
+        'type' => 'post',
+        'data' => serialize($data),
+        'service' => 'facebook',
+        'uid' => \Drupal::currentUser()->id(),
+      ])
+      ->updateFields([
+        'date' => $data['created_time']->getTimestamp(),
+        'type' => 'post',
+        'data' => serialize($data),
+      ])
+      ->key(['fid' => $data['id']])
+      ->execute();
+  }
+
 } // end of class
