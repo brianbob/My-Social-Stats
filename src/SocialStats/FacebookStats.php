@@ -12,8 +12,8 @@ class FacebookStats extends BaseStats {
   private $app_id;
   private $app_secret;
 
-   /*
-    *
+   /**
+    * Class constructor. Creates and sets the facebook object.
     */
   function __construct($config = NULL) {
     parent::__construct();
@@ -39,8 +39,11 @@ class FacebookStats extends BaseStats {
     }
    }
 
-  /*
+  /**
+   * Check to see if we are currently logged in with Facebook.
    *
+   * @return boolean
+   *   True if we are logged in, false if not.
    */
   public function amILoggedIn() {
     if(isset($_SESSION['fb_access_token'])) {
@@ -49,8 +52,12 @@ class FacebookStats extends BaseStats {
     return FALSE;
    }
 
-  /*
+  /**
+   * Get a login link for Facebook.
    *
+   * @return String
+   *   A string of HTML containing the login link for facebook or a message letting you know
+   *   that you are already authenticated.
    */
   public function getLoginLink() {
     $config = \Drupal::config('my_social_stats.settings');
@@ -70,8 +77,8 @@ class FacebookStats extends BaseStats {
     return '<p>You are currently logged in to Facebook.';
    }
 
-  /*
-   *
+  /**
+   * Perform the needed computations after logging in with Facebook.
    */
   public function callback() {
     $message = '';
@@ -126,8 +133,8 @@ class FacebookStats extends BaseStats {
     return $message;
   }
 
-  /*
-   *
+  /**
+   * Connect to Facebook and download the data needed by our charts.
    */
   public function getDataFromFacebook() {
     $done = FALSE;
@@ -168,10 +175,13 @@ class FacebookStats extends BaseStats {
     }
   }
 
-  /*
-   * Dis
+  /**
+   * Get the data for the "Posts over time" Chart.
+   *
+   * @return array
+   *   The data array to be passed to google charts.
    */
-  public function getPostsData() {
+  public function getPostsOverTimeData() {
     $data_array = [];
     $fb_data = $this->getData('facebook');
     // Add the first entry to our data array which will serve as our chart headers.
@@ -190,7 +200,7 @@ class FacebookStats extends BaseStats {
    *
    */
   public function getLikesData() {
-    return;
+
   }
 
   /*
@@ -200,29 +210,37 @@ class FacebookStats extends BaseStats {
     return;
   }
 
-  /*
+  /**
+   * Get the data for the "Shares vs OC" chart.
    *
+   * @return array
+   *   The data array to be passed to google charts.
    */
-  public function getSharesData() {$data_array = [];
-    $fb_data = $this->getData('facebook');
-    $data_array = [];
+  public function getOCvsSharesData() {
     // Add the first entry to our data array which will serve as our chart headers.
-    $data_array['OC'] = "Shares";
+    $data_array['Original Content'] = "Shares";
+    // Intilize the array where our data will live.
     $data_array['oc'] = $data_array['shares'] = 0;
+    // Get the facebook data from the database (or Cache)
+    $fb_data = $this->getData('facebook');
     // Here we are compiling the data from the query.
     foreach ($fb_data as $result) {
       $data = unserialize($result->data);
-      $data[oc] ? $data_array['oc']++ : $data_array['shares']++;
+      $data['oc'] ? $data_array['oc']++ : $data_array['shares']++;
     }
 
     return $data_array;
   }
 
-
+  /**
+   * Save a record from a platform.
+   *
+   * @param array $data
+   *   The array of data to save.
+   */
   public function saveRecord($data) {
-    // Store the results in our database table. If the record already exists
-    // update the record instead of adding a duplicate.
     $db = Database::getConnection();
+    // If the record already exists update the record instead of adding a duplicate.
     $db->merge('mss_base')
       ->insertFields([
         //'description' => '',

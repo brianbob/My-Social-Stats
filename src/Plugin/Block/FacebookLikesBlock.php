@@ -21,7 +21,7 @@ class FacebookLikesBlock extends BlockBase implements BlockPluginInterface {
   public function build() {
     $fb = new FacebookStats();
     // Get the data from Facebook.
-    $data = $fb->displayPostGraph();
+    $data = $fb->getPostsOverTimeData();
     // Return the array that creates the chart container for our chart, includes
     // the JS we need, and passes teh data to the JS.
     return array(

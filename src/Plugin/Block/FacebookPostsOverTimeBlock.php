@@ -13,15 +13,15 @@ use Drupal\my_social_stats\SocialStats\FacebookStats;
  * @Block(
  *   id = "mss_facebook_posts",
  *   admin_label = @Translation("Facebook Posts over Time"),
- *   category = @Translation("My Social Stats"),
+ *   category = @Translation("Social Stats"),
  * )
  */
-class FacebookPostsBlock extends BlockBase implements BlockPluginInterface {
+class FacebookPostsOverTImeBlock extends BlockBase implements BlockPluginInterface {
 
   public function build() {
     $fb = new FacebookStats();
     // Get the data from Facebook.
-    $data = $fb->getPostsData();
+    $data = $fb->getPostsOverTimeData();
     // Return the array that creates the chart container for our chart, includes
     // the JS we need, and passes teh data to the JS.
     return array(

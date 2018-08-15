@@ -1,5 +1,5 @@
-name: My Social Stats
-description: Creates blocks that show various social media stats. 
+name: Social Stats
+description: Creates blocks that show various social media stats.
 package: brianbridge
 
 type: module
