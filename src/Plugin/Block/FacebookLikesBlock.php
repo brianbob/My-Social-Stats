@@ -11,12 +11,12 @@ use Drupal\my_social_stats\SocialStats\FacebookStats;
  * Provides a Facebook stats Block.
  *
  * @Block(
- *   id = "mss_facebook_posts",
+ *   id = "mss_facebook_likes",
  *   admin_label = @Translation("Facebook Posts over Time"),
  *   category = @Translation("My Social Stats"),
  * )
  */
-class FacebookBlock extends BlockBase implements BlockPluginInterface {
+class FacebookLikesBlock extends BlockBase implements BlockPluginInterface {
 
   public function build() {
     $fb = new FacebookStats();

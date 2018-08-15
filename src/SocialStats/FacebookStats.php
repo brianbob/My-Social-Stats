@@ -17,27 +17,25 @@ class FacebookStats extends BaseStats {
     */
   function __construct($config = NULL) {
     parent::__construct();
-
+    // Check to see if we got passed the config obejct or not. If not, load it.
     if(is_null($config)) {
-      // Get the config object.
       $config = \Drupal::config('my_social_stats.settings');
     }
+    //  Get the facebook settings.
     $app_secret = $config->get('my_social_stats.app_secret');
     $app_id = $config->get('my_social_stats.app_id');
     // Get our config values.
     $this->app_id = $app_id;
     $this->app_secret = $app_secret;
+    // Make sure we have our settings set.
     if (isset($app_id) && isset($app_secret)) {
-      // create and return the facebook object.
+      // If we have a app ID and secret key, use them to create the FB object.
       $this->fb = new \Facebook\Facebook([
         'app_id' => $this->app_id,
         'app_secret' => $this->app_secret,
         'default_graph_version' => 'v2.10',
         //'default_access_token' => '{access-token}', // optional
       ]);
-    }
-    else {
-      // What do we do here? Nothing? error message?
     }
    }
 
@@ -160,6 +158,8 @@ class FacebookStats extends BaseStats {
         // Get the reactions on the post.
         $reactions_metadata = $this->fb->get('/' . $data['id'] . '/reactions?summary=true')->getGraphEdge()->getMetaData();
         $data['reactions'] = $reactions_metadata['summary']['total_count'];
+        // Check for OC or reposts.
+        $data['oc']  = isset($post['message']) ? TRUE : FALSE;
         // Save the data.
         $this->saveRecord($data);
       }
@@ -171,7 +171,7 @@ class FacebookStats extends BaseStats {
   /*
    * Dis
    */
-  public function displayPostGraph() {
+  public function getPostsData() {
     $data_array = [];
     $fb_data = $this->getData('facebook');
     // Add the first entry to our data array which will serve as our chart headers.
@@ -189,22 +189,33 @@ class FacebookStats extends BaseStats {
   /*
    *
    */
-  public function displayLikesGraph() {
+  public function getLikesData() {
     return;
   }
 
   /*
    *
    */
-  public function displayReactionsGraph() {
+  public function getReactionsData() {
     return;
   }
 
   /*
    *
    */
-  public function displaySharesGraph() {
-    return;
+  public function getSharesData() {$data_array = [];
+    $fb_data = $this->getData('facebook');
+    $data_array = [];
+    // Add the first entry to our data array which will serve as our chart headers.
+    $data_array['OC'] = "Shares";
+    $data_array['oc'] = $data_array['shares'] = 0;
+    // Here we are compiling the data from the query.
+    foreach ($fb_data as $result) {
+      $data = unserialize($result->data);
+      $data[oc] ? $data_array['oc']++ : $data_array['shares']++;
+    }
+
+    return $data_array;
   }
 
 
