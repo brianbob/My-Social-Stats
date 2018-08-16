@@ -190,7 +190,31 @@ class FacebookStats extends BaseStats {
     foreach ($fb_data as $result) {
       $data = unserialize($result->data);
       $month = date('M', $result->date);
-      isset($data_array[$month]) ? $data_array[$month] += 1 : $data_array[$month] = 0;
+      isset($data_array[$month]) ? $data_array[$month] += 1 : $data_array[$month] = 1;
+    }
+
+    return $data_array;
+  }
+
+  /*
+   * IP
+   */
+  public function getLikesVsReactionsData() {
+    // Get the facebook data from the database (or cache).
+    $fb_data = $this->getData('facebook');
+    // Add the first entry to our data array which will serve as our chart headers.
+    $data_array['Likes'] = "Reactions";
+    // Initialize the variables.
+    $data_array['likes'] = $data_array['reactions'] = 0;
+    // Here we are compiling the data from the query.
+    foreach ($fb_data as $result) {
+      $data = unserialize($result->data);
+      $month = date('M', $result->date);
+      // Make sure our data array is set.
+      isset($data_array[$month]) ? : $data_array[$month] = array('likes'=>0, 'reactions'=>0);
+      // Update our monthly numbers.
+      $data_array[$month]['likes'] += $result['likes'];
+      $data_array[$month]['reactions'] += $result['reactions'];
     }
 
     return $data_array;
@@ -199,14 +223,7 @@ class FacebookStats extends BaseStats {
   /*
    *
    */
-  public function getLikesData() {
-
-  }
-
-  /*
-   *
-   */
-  public function getReactionsData() {
+  public function getComboChartData() {
     return;
   }
 
