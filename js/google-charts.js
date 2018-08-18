@@ -10,6 +10,10 @@
     if ($('#facebook_shares_chart_div').length) {
       google.charts.setOnLoadCallback(drawFacebookSharesChart);
     }
+    // Check to see if the likes vs reactons chart is on the page. If it is, draw it.
+    if ($('#facebook_likes_chart_div').length) {
+      google.charts.setOnLoadCallback(drawFacebookLikesChart);
+    }
 
   });
 
@@ -86,6 +90,49 @@
 
     // Instantiate and draw our chart, passing in some options.
     var chart = new google.visualization.PieChart(document.getElementById('facebook_shares_chart_div'));
+    chart.draw(data, options);
+  }
+
+
+  // Callback that creates and populates a data table,
+  // instantiates the lines chart, passes in the data and
+  // draws it.
+  function drawFacebookLikesChart() {
+
+    // Get the data from Dupal and create the data table.
+    var data_object = drupalSettings.facebook_block.facebook_likes;
+    var data_array = Object.entries(data_object);
+    var formatted_array = [['Month', 'Likes', 'Reactions']];
+    data_array.forEach(function(element) {
+      formatted_array.push([element[0], element[1]['likes'], element[1]['reactions']]);
+    });
+    console.log(formatted_array);
+    var data = google.visualization.arrayToDataTable(formatted_array);
+
+    // Set chart options
+    var options = {
+      'height': 300,
+      'titlePosition': 'none',
+      //'legend': 'none',
+      'backgroundColor': 'transparent',
+      'fontName': 'Raleway',
+      'allowHtml': true,
+      'hAxis': {
+        'textStyle' : {
+          'color': '#bfc9d3'
+        }
+      },
+      'vAxis': {
+        'textStyle' : {
+          'color': '#bfc9d3'
+        }
+      },
+      'pieHole': 0.4,
+      'pieSliceBorderColor': "transparent"
+    };
+
+    // Instantiate and draw our chart, passing in some options.
+    var chart = new google.visualization.LineChart(document.getElementById('facebook_likes_chart_div'));
     chart.draw(data, options);
   }
 }(jQuery, Drupal, drupalSettings));

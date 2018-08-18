@@ -11,21 +11,21 @@ use Drupal\my_social_stats\SocialStats\FacebookStats;
  * Provides a Facebook stats Block.
  *
  * @Block(
- *   id = "mss_facebook_likes",
- *   admin_label = @Translation("Facebook Posts over Time"),
- *   category = @Translation("My Social Stats"),
+ *   id = "mss_facebook_likes_vs_reactions",
+ *   admin_label = @Translation("Facebook Likes vs Reactions"),
+ *   category = @Translation("Social Stats"),
  * )
  */
-class FacebookLikesBlock extends BlockBase implements BlockPluginInterface {
+class FacebookLikesVsReactionsBlock extends BlockBase implements BlockPluginInterface {
 
   public function build() {
     $fb = new FacebookStats();
     // Get the data from Facebook.
-    $data = $fb->getPostsOverTimeData();
+    $data = $fb->getLikesVsReactionsData();
     // Return the array that creates the chart container for our chart, includes
     // the JS we need, and passes teh data to the JS.
     return array(
-      '#markup' => $this->t('<div class="facebook-chart-container"><div class="title">Facebook Posts by Month</div><div id=facebook_posts_chart_div></div></div>'),
+      '#markup' => $this->t('<div class="facebook-chart-container"><div class="title">Facebook Posts by Month</div><div id=facebook_likes_chart_div></div></div>'),
       '#attached' => array(
         'library' => array(
           'my_social_stats/google-charts-core',
@@ -33,7 +33,7 @@ class FacebookLikesBlock extends BlockBase implements BlockPluginInterface {
         ),
         'drupalSettings' => array(
           'facebook_block' => array(
-            'facebook_posts' => $data,
+            'facebook_likes' => $data,
           ),
         ),
       ),

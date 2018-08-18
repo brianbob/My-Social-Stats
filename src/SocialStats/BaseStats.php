@@ -36,6 +36,7 @@ abstract class BaseStats {
       $query = $db->select('mss_base', 'm');
       $query->fields('m');
       $query->condition('m.service', $platform);
+      $query->orderBy('date');
       $results_object = $query->execute();
       $data = $results_object->fetchAll(\PDO::FETCH_OBJ);
       // Cache the query results.

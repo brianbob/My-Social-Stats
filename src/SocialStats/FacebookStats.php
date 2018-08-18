@@ -196,25 +196,24 @@ class FacebookStats extends BaseStats {
     return $data_array;
   }
 
-  /*
-   * IP
+  /**
+   * Get the data for the "Likes vs Reactions" Chart.
+   *
+   * @return array
+   *   The data array to be passed to google charts.
    */
   public function getLikesVsReactionsData() {
     // Get the facebook data from the database (or cache).
     $fb_data = $this->getData('facebook');
-    // Add the first entry to our data array which will serve as our chart headers.
-    $data_array['Likes'] = "Reactions";
-    // Initialize the variables.
-    $data_array['likes'] = $data_array['reactions'] = 0;
-    // Here we are compiling the data from the query.
+    // Compile the data from the query.
     foreach ($fb_data as $result) {
       $data = unserialize($result->data);
       $month = date('M', $result->date);
       // Make sure our data array is set.
-      isset($data_array[$month]) ? : $data_array[$month] = array('likes'=>0, 'reactions'=>0);
+      isset($data_array[$month]) ? : $data_array[$month] = ['likes' => 0, 'reactions' => 0];
       // Update our monthly numbers.
-      $data_array[$month]['likes'] += $result['likes'];
-      $data_array[$month]['reactions'] += $result['reactions'];
+      $data_array[$month]['likes'] += $data['likes'];
+      $data_array[$month]['reactions'] += $data['reactions'];
     }
 
     return $data_array;
