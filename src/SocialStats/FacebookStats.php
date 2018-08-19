@@ -82,7 +82,6 @@ class FacebookStats extends BaseStats {
    */
   public function callback() {
     $message = '';
-    //$this->get_fb_object();
     $helper = $this->fb->getRedirectLoginHelper();
 
     try {
@@ -102,7 +101,6 @@ class FacebookStats extends BaseStats {
         $message .=  "Error Reason: " . $helper->getErrorReason() . "\n";
         $message .=  "Error Description: " . $helper->getErrorDescription() . "\n";
       } else {
-        //header('HTTP/1.0 400 Bad Request');
         $message .=  'Bad request';
       }
       return $message;
@@ -165,6 +163,9 @@ class FacebookStats extends BaseStats {
         // Get the reactions on the post.
         $reactions_metadata = $this->fb->get('/' . $data['id'] . '/reactions?summary=true')->getGraphEdge()->getMetaData();
         $data['reactions'] = $reactions_metadata['summary']['total_count'];
+        // Get the comments on the post.
+        $comments_metadata = $this->fb->get('/' . $data['id'] . '/comments?summary=true')->getGraphEdge()->getMetaData();
+        $data['comments'] = $comments_metadata['summary']['total_count'];
         // Check for OC or reposts.
         $data['oc']  = isset($post['message']) ? TRUE : FALSE;
         // Save the data.
@@ -226,6 +227,26 @@ class FacebookStats extends BaseStats {
     return;
   }
 
+  /*
+   *
+   */
+  public function getCommentData() {
+    $data_array = [];
+    // Get the facebook data from the database (or cache).
+    $fb_data = $this->getData('facebook');
+    // Create our headers.
+    $data_array['Month'] = "Comments";
+    // Compile the data from the query.
+    foreach ($fb_data as $result) {
+      $data = unserialize($result->data);
+      $month = date('M', $result->date);
+      // Check to make sure the array is set properly before incrementing it.
+      isset($data_array[$month]) ? $data_array[$month] += $data['comments'] : $data_array[$month] = $data['comments'];
+    }
+
+    return $data_array;
+  }
+
   /**
    * Get the data for the "Shares vs OC" chart.
    *
@@ -234,15 +255,15 @@ class FacebookStats extends BaseStats {
    */
   public function getOCvsSharesData() {
     // Add the first entry to our data array which will serve as our chart headers.
-    $data_array['Original Content'] = "Shares";
+    $data_array['Original'] = "Share";
     // Intilize the array where our data will live.
-    $data_array['oc'] = $data_array['shares'] = 0;
+    $data_array['Original Content'] = $data_array['Share'] = 0;
     // Get the facebook data from the database (or Cache)
     $fb_data = $this->getData('facebook');
     // Here we are compiling the data from the query.
     foreach ($fb_data as $result) {
       $data = unserialize($result->data);
-      $data['oc'] ? $data_array['oc']++ : $data_array['shares']++;
+      $data['oc'] ? $data_array['Original Content']++ : $data_array['Share']++;
     }
 
     return $data_array;
