@@ -1,6 +1,6 @@
 my_social_stats.settings:
-  title: 'My Social Stats Settings'
-  description: 'Settings page for the "My Social Stats" module.'
+  title: 'Social Stats Settings'
+  description: 'Settings page for the "Social Stats" module.'
   parent: system.admin_config_development
   route_name: my_social_stats.settings
   weight: 100
