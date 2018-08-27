@@ -33,7 +33,7 @@
 
     // Set chart options
     var options = {
-      'height': 300,
+      'height': 400,
       'titlePosition': 'none',
       'seriesType': 'bars',
       'legend': 'none',
@@ -73,7 +73,7 @@
 
     // Set chart options
     var options = {
-      'height': 300,
+      'height': 400,
       'titlePosition': 'none',
       //'legend': 'none',
       'backgroundColor': 'transparent',
@@ -116,7 +116,7 @@
     var data = google.visualization.arrayToDataTable(formatted_array);
     // Set chart options
     var options = {
-      'height': 300,
+      'height': 400,
       'titlePosition': 'none',
       //'legend': 'none',
       'backgroundColor': 'transparent',
@@ -154,7 +154,7 @@
 
     // Set chart options
     var options = {
-      'height': 300,
+      'height': 400,
       'titlePosition': 'none',
       'legend': 'none',
       'backgroundColor': 'transparent',
