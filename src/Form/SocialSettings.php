@@ -105,7 +105,6 @@ class SocialSettings extends ConfigFormBase {
     if(isset($app_id) && isset($app_secret)) {
       if($facebook->amILoggedIn()) {
         // If we're logged in, get update our data.
-        // @TODO make this configurable. I'm thinking a 'refresh' button?
         $facebook->getData();
         $message = "You are logged in. Your data has been refreshed.";
       }

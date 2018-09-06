@@ -1,2 +1,18 @@
 <?php
 
+use Drupal\my_social_stats\SocialStats\FacebookStats;
+
+/**
+ * Implementation of hook_cron().
+ *
+ * Updates facebook data.
+ *
+ * @todo Is this the way I want to do this? Should there be other checks?
+ */
+function my_social_stats_cron() {
+    $facebook = new FacebookStats();
+    if($facebook->amILoggedIn()) {
+        // If we're logged in, get update our data.
+        $facebook->getData();
+      }
+}
