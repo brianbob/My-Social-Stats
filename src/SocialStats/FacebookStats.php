@@ -17,18 +17,19 @@ class FacebookStats extends BaseStats {
     */
   function __construct($config = NULL) {
     parent::__construct();
+
     // Check to see if we got passed the config obejct or not. If not, load it.
     if(is_null($config)) {
       $config = \Drupal::config('my_social_stats.settings');
     }
     //  Get the facebook settings.
-    $app_secret = $config->get('my_social_stats.app_secret');
-    $app_id = $config->get('my_social_stats.app_id');
+    $app_secret = $config->get('my_social_stats.facebook_app_secret');
+    $app_id = $config->get('my_social_stats.facebook_app_id');
     // Get our config values.
     $this->app_id = $app_id;
     $this->app_secret = $app_secret;
     // Make sure we have our settings set.
-    if (isset($app_id) && isset($app_secret)) {
+    if (!empty($app_id) && !empty($app_secret)) {
       // If we have a app ID and secret key, use them to create the FB object.
       $this->fb = new \Facebook\Facebook([
         'app_id' => $this->app_id,
